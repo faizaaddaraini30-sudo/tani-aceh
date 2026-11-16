@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tani-Aceh - Marketplace & Dashboard Pertanian</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Tani-Aceh - Platform E-Commerce Pertanian Terpadu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- FontAwesome untuk Ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans" x-data="app()">
@@ -16,184 +13,162 @@
     <!-- HEADER / NAVBAR -->
     <header class="bg-green-700 text-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2 cursor-pointer" @click="currentTab = 'marketplace'">
+            <div class="flex items-center space-x-2 cursor-pointer" @click="currentRole = 'pembeli'; currentTab = 'marketplace'">
                 <i class="fa-solid fa-seedling text-2xl"></i>
                 <span class="text-xl font-bold tracking-wider">Tani-Aceh</span>
             </div>
             
-            <!-- Navigasi Menu Utama -->
-            <nav class="hidden md:flex space-x-6 text-sm font-medium">
-                <button @click="currentTab = 'marketplace'" :class="{'underline font-bold': currentTab === 'marketplace'}">Marketplace</button>
-                <button @click="currentTab = 'riwayat'" :class="{'underline font-bold': currentTab === 'riwayat'}">Pesanan Saya</button>
-                <button @click="currentTab = 'petani'" :class="{'underline font-bold': currentTab === 'petani'}">Dashboard Petani</button>
-                <button @click="currentTab = 'admin'" :class="{'underline font-bold': currentTab === 'admin'}">Dashboard Admin</button>
-                <button @click="currentTab = 'fitur-tambahan'" :class="{'underline font-bold': currentTab === 'fitur-tambahan'}">Info & Edukasi</button>
+            <!-- Switch Role/Navigation -->
+            <nav class="hidden md:flex space-x-4 text-sm font-semibold">
+                <button @click="currentRole = 'pembeli'; currentTab = 'marketplace'" :class="{'bg-green-800 px-3 py-1 rounded': currentRole === 'pembeli'}">Halaman Pembeli</button>
+                <button @click="currentRole = 'petani'" :class="{'bg-green-800 px-3 py-1 rounded': currentRole === 'petani'}">Halaman Petani</button>
+                <button @click="currentRole = 'admin'" :class="{'bg-green-800 px-3 py-1 rounded': currentRole === 'admin'}">Halaman Admin</button>
             </nav>
 
-            <!-- Tombol Keranjang -->
-            <div class="flex items-center space-x-4">
+            <!-- Cart Trigger (Khusus Pembeli) -->
+            <div class="flex items-center space-x-3" x-show="currentRole === 'pembeli'">
                 <button @click="openCart = true" class="relative bg-green-800 p-2 rounded-full hover:bg-green-600 transition">
                     <i class="fa-solid fa-cart-shopping text-lg"></i>
                     <span x-show="cart.length > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold" x-text="cart.reduce((sum, item) => sum + item.qty, 0)"></span>
                 </button>
+                <button @click="openAuth = true" class="bg-white text-green-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-gray-100" x-text="isLoggedIn ? 'Akun Saya' : 'Login / Register'"></button>
             </div>
         </div>
     </header>
 
+    <!-- MOBILE ROLE SELECTOR -->
+    <div class="bg-green-800 text-white py-2 px-4 md:hidden flex justify-around text-xs font-semibold">
+        <button @click="currentRole = 'pembeli'" :class="{'underline font-bold': currentRole === 'pembeli'}">Pembeli</button>
+        <button @click="currentRole = 'petani'" :class="{'underline font-bold': currentRole === 'petani'}">Petani</button>
+        <button @click="currentRole = 'admin'" :class="{'underline font-bold': currentRole === 'admin'}">Admin</button>
+    </div>
+
     <!-- KONTEN UTAMA -->
     <main class="container mx-auto px-4 py-6">
 
-        <!---------------- 1. MARKETPLACE HASIL PERTANIAN ---------------->
-        <section x-show="currentTab === 'marketplace'">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h1 class="text-2xl font-bold text-green-800"><i class="fa-solid fa-store mr-2"></i>Marketplace Pertanian Aceh</h1>
-                
-                <!-- Pencarian & Kategori -->
-                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    <input type="text" x-model="searchQuery" placeholder="Cari produk pertanian..." class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-64">
-                    <select x-model="selectedCategory" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        <!-------------------------------------------------->
+        <!-- 1. HALAMAN PEMBELI                            -->
+        <!-------------------------------------------------->
+        <div x-show="currentRole === 'pembeli'">
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-green-800"><i class="fa-solid fa-store mr-2"></i>Marketplace Pertanian Aceh</h1>
+                    <p class="text-xs text-gray-500">Belanja langsung hasil bumi segar dari petani lokal Aceh.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button @click="currentTab = 'marketplace'" :class="currentTab === 'marketplace' ? 'bg-green-700 text-white' : 'bg-white text-gray-700'" class="px-4 py-2 rounded-lg text-sm font-semibold shadow border transition">Katalog Produk</button>
+                    <button @click="currentTab = 'riwayat'" :class="currentTab === 'riwayat' ? 'bg-green-700 text-white' : 'bg-white text-gray-700'" class="px-4 py-2 rounded-lg text-sm font-semibold shadow border transition">Riwayat Pesanan</button>
+                </div>
+            </div>
+
+            <!-- Tab Marketplace / Cari & Filter -->
+            <div x-show="currentTab === 'marketplace'">
+                <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <input type="text" x-model="searchQuery" placeholder="Cari hasil pertanian (misal: Cabai, Bawang)..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 w-full sm:w-80">
+                    <select x-model="selectedCategory" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
                         <option value="">Semua Kategori</option>
                         <option value="Sayur">Sayuran</option>
                         <option value="Buah">Buah-buahan</option>
                         <option value="Rempah">Rempah-rempah</option>
                     </select>
                 </div>
-            </div>
 
-            <!-- Daftar Produk -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <template x-for="product in filteredProducts" :key="product.id">
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col justify-between">
-                        <div>
-                            <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover">
-                            <div class="p-4">
-                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-semibold" x-text="product.category"></span>
-                                <h3 class="font-bold text-lg mt-2 text-gray-800" x-text="product.name"></h3>
-                                <p class="text-green-700 font-bold mt-1">Rp <span x-text="product.price.toLocaleString()"></span> / kg</p>
-                                <p class="text-xs text-gray-500 mt-1">Stok: <span x-text="product.stock"></span> kg | Petani: <span x-text="product.farmer"></span></p>
-                            </div>
-                        </div>
-                        <div class="p-4 pt-0 flex gap-2">
-                            <button @click="viewDetail(product)" class="w-1/2 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">Detail</button>
-                            <button @click="addToCart(product)" class="w-1/2 bg-green-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>Beli</button>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </section>
-
-
-        <!---------------- 2. KERANJANG & CHECKOUT MODAL ---------------->
-        <div x-show="openCart" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
-            <div class="bg-white w-full max-w-md h-full p-6 flex flex-col shadow-xl overflow-y-auto">
-                <div class="flex justify-between items-center border-b pb-3 mb-4">
-                    <h2 class="text-xl font-bold text-green-800"><i class="fa-solid fa-cart-shopping mr-2"></i>Keranjang Belanja</h2>
-                    <button @click="openCart = false" class="text-gray-500 hover:text-red-500 text-xl font-bold">&times;</button>
-                </div>
-
-                <!-- Isi Keranjang -->
-                <div class="flex-1 overflow-y-auto space-y-4">
-                    <template x-for="(item, index) in cart" :key="index">
-                        <div class="flex justify-between items-center border-b pb-3">
+                <!-- Grid Produk -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <template x-for="product in filteredProducts" :key="product.id">
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col justify-between">
                             <div>
-                                <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                                <p class="text-sm text-gray-500">Rp <span x-text="item.price.toLocaleString()"></span> / kg</p>
+                                <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover">
+                                <div class="p-4">
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-semibold" x-text="product.category"></span>
+                                    <h3 class="font-bold text-lg mt-2 text-gray-800" x-text="product.name"></h3>
+                                    <p class="text-green-700 font-bold mt-1">Rp <span x-text="product.price.toLocaleString()"></span> / kg</p>
+                                    <p class="text-xs text-gray-500 mt-1">Stok: <span x-text="product.stock"></span> kg | Petani: <span x-text="product.farmer"></span></p>
+                                    <p class="text-xs text-gray-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>Asal: <span x-text="product.origin"></span></p>
+                                </div>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" min="1" :max="item.stock" x-model.number="item.qty" @change="updateCartQty(index)" class="w-16 border rounded text-center py-1">
-                                <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                            <div class="p-4 pt-0 flex gap-2">
+                                <button @click="viewDetail(product)" class="w-1/2 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">Detail</button>
+                                <button @click="addToCart(product)" class="w-1/2 bg-green-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>Beli</button>
                             </div>
                         </div>
                     </template>
-                    <p x-show="cart.length === 0" class="text-center text-gray-500 mt-10">Keranjang masih kosong.</p>
                 </div>
+            </div>
 
-                <!-- Total & Form Checkout -->
-                <div class="border-t pt-4 mt-4" x-show="cart.length > 0">
-                    <div class="flex justify-between font-bold text-lg mb-4">
-                        <span>Total Harga:</span>
-                        <span class="text-green-700">Rp <span x-text="cartTotal.toLocaleString()"></span></span>
-                    </div>
-
-                    <div class="space-y-3 mb-4">
-                        <h3 class="font-semibold text-gray-700 text-sm">Alamat Pengiriman Pembeli</h3>
-                        <textarea x-model="checkoutForm.address" placeholder="Masukkan alamat lengkap (Kecamatan, Kota/Kabupaten)..." class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none" rows="2"></textarea>
-                        <input type="text" x-model="checkoutForm.name" placeholder="Nama Penerima" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none">
-                        <input type="text" x-model="checkoutForm.phone" placeholder="Nomor Telepon / WhatsApp" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none">
-                    </div>
-
-                    <button @click="checkoutOrder" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow">Buat Pesanan Sekarang</button>
+            <!-- Tab Riwayat dan Status Pesanan Pembeli -->
+            <div x-show="currentTab === 'riwayat'">
+                <h2 class="text-xl font-bold text-green-800 mb-4"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Riwayat & Status Pesanan Pembeli</h2>
+                <div class="space-y-4">
+                    <template x-for="order in orders" :key="order.id">
+                        <div class="bg-white p-5 rounded-xl shadow-md border-l-4" :class="{
+                            'border-yellow-500': order.status === 'Menunggu Konfirmasi',
+                            'border-blue-500': order.status === 'Diproses',
+                            'border-purple-500': order.status === 'Dikirim',
+                            'border-green-600': order.status === 'Selesai'
+                        }">
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <span class="font-bold text-gray-800" x-text="order.id"></span>
+                                    <p class="text-xs text-gray-500">Penerima: <span x-text="order.name"></span> (<span x-text="order.phone"></span>)</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold" :class="{
+                                    'bg-yellow-100 text-yellow-800': order.status === 'Menunggu Konfirmasi',
+                                    'bg-blue-100 text-blue-800': order.status === 'Diproses',
+                                    'bg-purple-100 text-purple-800': order.status === 'Dikirim',
+                                    'bg-green-100 text-green-800': order.status === 'Selesai'
+                                }" x-text="order.status"></span>
+                            </div>
+                            <div class="border-t pt-3 text-sm text-gray-600">
+                                <p><strong>Alamat:</strong> <span x-text="order.address"></span></p>
+                                <p><strong>Total:</strong> Rp <span x-text="order.total.toLocaleString()"></span></p>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
 
 
-        <!---------------- 3. RIWAYAT DAN STATUS PESANAN ---------------->
-        <section x-show="currentTab === 'riwayat'">
-            <h1 class="text-2xl font-bold text-green-800 mb-6"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Riwayat & Status Pesanan</h1>
-            
-            <div class="space-y-4">
-                <template x-for="order in orders" :key="order.id">
-                    <div class="bg-white p-5 rounded-xl shadow-md border-l-4" :class="{
-                        'border-yellow-500': order.status === 'Menunggu Konfirmasi',
-                        'border-blue-500': order.status === 'Diproses',
-                        'border-purple-500': order.status === 'Dikirim',
-                        'border-green-600': order.status === 'Selesai'
-                    }">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
-                            <div>
-                                <span class="font-bold text-gray-700" x-text="order.id"></span>
-                                <p class="text-xs text-gray-500">Penerima: <span x-text="order.name"></span> - <span x-text="order.phone"></span></p>
-                            </div>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold mt-2 sm:mt-0" :class="{
-                                'bg-yellow-100 text-yellow-800': order.status === 'Menunggu Konfirmasi',
-                                'bg-blue-100 text-blue-800': order.status === 'Diproses',
-                                'bg-purple-100 text-purple-800': order.status === 'Dikirim',
-                                'bg-green-100 text-green-800': order.status === 'Selesai'
-                            }" x-text="order.status"></span>
-                        </div>
-                        <div class="border-t pt-3 text-sm text-gray-600">
-                            <p><strong>Alamat:</strong> <span x-text="order.address"></span></p>
-                            <p><strong>Total Pembayaran:</strong> Rp <span x-text="order.total.toLocaleString()"></span></p>
-                        </div>
-                    </div>
-                </template>
-                <p x-show="orders.length === 0" class="text-gray-500 text-center py-10">Belum ada riwayat pesanan.</p>
-            </div>
-        </section>
-
-
-        <!---------------- 4. DASHBOARD PETANI ---------------->
-        <section x-show="currentTab === 'petani'">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-green-800"><i class="fa-solid fa-tractor mr-2"></i>Dashboard Petani</h1>
-                <button @click="openFarmerModal = true" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>Tambah Produk Baru</button>
+        <!-------------------------------------------------->
+        <!-- 2. HALAMAN PETANI                             -->
+        <!-------------------------------------------------->
+        <div x-show="currentRole === 'petani'">
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-green-800"><i class="fa-solid fa-tractor mr-2"></i>Halaman & Dashboard Petani</h1>
+                    <p class="text-xs text-gray-500">Kelola produk panen, foto, harga, stok, dan pesanan masuk dari pembeli.</p>
+                </div>
+                <button @click="openFarmerModal = true" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 shadow"><i class="fa-solid fa-plus mr-1"></i>Tambah Produk</button>
             </div>
 
             <!-- Tabel Produk Petani -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-                <h3 class="font-bold text-lg p-4 bg-green-50 text-green-800 border-b">Kelola Produk Saya</h3>
+                <h3 class="font-bold text-lg p-4 bg-green-50 text-green-800 border-b">Kelola & Atur Harga & Stok Produk</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-gray-100 text-xs text-gray-600 uppercase">
-                                <th class="p-3">Produk</th>
+                                <th class="p-3">Foto & Produk</th>
                                 <th class="p-3">Kategori</th>
                                 <th class="p-3">Harga (Rp/kg)</th>
                                 <th class="p-3">Stok (kg)</th>
-                                <th class="p-3 text-center">Aksi</th>
+                                <th class="p-3 text-center">Aksi (Edit/Hapus)</th>
                             </tr>
                         </thead>
                         <tbody class="text-sm divide-y">
-                            <template x-for="(prod, index) in products" :key="prod.id">
+                            <template x-for="prod in products" :key="prod.id">
                                 <tr>
-                                    <td class="p-3 font-semibold" x-text="prod.name"></td>
+                                    <td class="p-3 flex items-center space-x-3">
+                                        <img :src="prod.image" class="w-12 h-12 object-cover rounded">
+                                        <span class="font-semibold" x-text="prod.name"></span>
+                                    </td>
                                     <td class="p-3" x-text="prod.category"></td>
-                                    <td class="p-3">Rp <span x-text="prod.price.toLocaleString()"></span></td>
+                                    <td class="p-3 font-bold text-green-700">Rp <span x-text="prod.price.toLocaleString()"></span></td>
                                     <td class="p-3" x-text="prod.stock"></td>
                                     <td class="p-3 text-center space-x-2">
-                                        <button @click="editProduct(prod)" class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button @click="deleteProduct(prod.id)" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
+                                        <button @click="editProduct(prod)" class="text-blue-600 hover:text-blue-800 font-bold px-2 py-1 bg-blue-50 rounded"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button @click="deleteProduct(prod.id)" class="text-red-600 hover:text-red-800 font-bold px-2 py-1 bg-red-50 rounded"><i class="fa-solid fa-trash"></i></button>
                                     </td>
                                 </tr>
                             </template>
@@ -202,18 +177,19 @@
                 </div>
             </div>
 
-            <!-- Pesanan Masuk untuk Petani -->
+            <!-- Kelola Pesanan Masuk (Petani) -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <h3 class="font-bold text-lg p-4 bg-green-50 text-green-800 border-b">Pesanan Masuk & Perbarui Status</h3>
+                <h3 class="font-bold text-lg p-4 bg-green-50 text-green-800 border-b">Kelola Pesanan Masuk</h3>
                 <div class="divide-y">
                     <template x-for="order in orders" :key="order.id">
                         <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
-                                <span class="font-bold text-sm text-gray-800" x-text="order.id"></span>
+                                <span class="font-bold text-gray-800" x-text="order.id"></span>
                                 <p class="text-xs text-gray-500">Pembeli: <span x-text="order.name"></span> | Alamat: <span x-text="order.address"></span></p>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <select x-model="order.status" class="border rounded px-3 py-1 text-sm bg-gray-50 focus:ring-2 focus:ring-green-500">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xs font-semibold">Ubah Status:</span>
+                                <select x-model="order.status" class="border rounded px-3 py-1 text-sm bg-gray-50 focus:ring-2 focus:ring-green-500 font-semibold">
                                     <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
                                     <option value="Diproses">Diproses</option>
                                     <option value="Dikirim">Dikirim</option>
@@ -224,109 +200,171 @@
                     </template>
                 </div>
             </div>
-        </section>
+        </div>
 
 
-        <!---------------- 5. DASHBOARD ADMIN ---------------->
-        <section x-show="currentTab === 'admin'">
-            <h1 class="text-2xl font-bold text-green-800 mb-6"><i class="fa-solid fa-user-shield mr-2"></i>Dashboard Admin Sistem</h1>
-            
-            <!-- Statistik Penjualan -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <!-------------------------------------------------->
+        <!-- 3. HALAMAN ADMIN                              -->
+        <!-------------------------------------------------->
+        <div x-show="currentRole === 'admin'">
+            <div class="mb-6 border-b pb-3">
+                <h1 class="text-2xl font-bold text-green-800"><i class="fa-solid fa-user-shield mr-2"></i>Halaman & Dashboard Admin Sistem</h1>
+                <p class="text-xs text-gray-500">Statistik lengkap, kontrol pembeli, petani, produk, pesanan, dan laporan transaksi.</p>
+            </div>
+
+            <!-- Dashboard Statistik -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
                 <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-green-600">
-                    <p class="text-sm text-gray-500 font-semibold">Total Pendapatan Transaksi</p>
+                    <p class="text-xs text-gray-500 font-bold uppercase">Total Transaksi</p>
                     <h3 class="text-2xl font-bold text-gray-800 mt-1">Rp <span x-text="totalRevenue.toLocaleString()"></span></h3>
                 </div>
                 <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-blue-600">
-                    <p class="text-sm text-gray-500 font-semibold">Total Petani Terdaftar</p>
-                    <h3 class="text-2xl font-bold text-gray-800 mt-1">12 Petani</h3>
+                    <p class="text-xs text-gray-500 font-bold uppercase">Total Pembeli</p>
+                    <h3 class="text-2xl font-bold text-gray-800 mt-1">248 Akun</h3>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-yellow-600">
+                    <p class="text-xs text-gray-500 font-bold uppercase">Total Petani</p>
+                    <h3 class="text-2xl font-bold text-gray-800 mt-1">15 Mitra</h3>
                 </div>
                 <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-purple-600">
-                    <p class="text-sm text-gray-500 font-semibold">Pesanan Diproses</p>
-                    <h3 class="text-2xl font-bold text-gray-800 mt-1" x-text="orders.length"></h3>
+                    <p class="text-xs text-gray-500 font-bold uppercase">Total Produk</p>
+                    <h3 class="text-2xl font-bold text-gray-800 mt-1" x-text="products.length + ' Item'"></h3>
                 </div>
             </div>
 
-            <!-- Pengelolaan Akun & Produk Admin -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Panel Kelola -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Kelola Pembeli dan Petani -->
                 <div class="bg-white p-5 rounded-xl shadow-md">
-                    <h3 class="font-bold text-lg text-green-800 mb-3"><i class="fa-solid fa-users-gear mr-2"></i>Kelola Akun Pengguna</h3>
+                    <h3 class="font-bold text-lg text-green-800 mb-3"><i class="fa-solid fa-users-gear mr-2"></i>Kelola Pembeli dan Petani</h3>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex justify-between items-center border-b pb-2"><span>Pak Tani Usman (Petani)</span> <span class="text-green-600 font-bold">Aktif</span></li>
-                        <li class="flex justify-between items-center border-b pb-2"><span>Ibu Siti Aminah (Petani)</span> <span class="text-green-600 font-bold">Aktif</span></li>
-                        <li class="flex justify-between items-center border-b pb-2"><span>Budi Santoso (Pembeli)</span> <span class="text-green-600 font-bold">Aktif</span></li>
-                    </ul>
-                </div>
-                <div class="bg-white p-5 rounded-xl shadow-md">
-                    <h3 class="font-bold text-lg text-green-800 mb-3"><i class="fa-solid fa-boxes-stacked mr-2"></i>Monitor Produk Global</h3>
-                    <p class="text-sm text-gray-600 mb-3">Admin dapat memantau dan memoderasi seluruh katalog hasil bumi yang diunggah oleh petani lokal Aceh.</p>
-                    <span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold" x-text="products.length + ' Produk Aktif'"></span>
-                </div>
-            </div>
-        </section>
-
-
-        <!---------------- 6. FITUR TAMBAHAN ---------------->
-        <section x-show="currentTab === 'fitur-tambahan'">
-            <h1 class="text-2xl font-bold text-green-800 mb-6"><i class="fa-solid fa-circle-info mr-2"></i>Informasi & Fitur Tambahan Pertanian</h1>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Informasi Cuaca -->
-                <div class="bg-white p-5 rounded-xl shadow-md">
-                    <h3 class="font-bold text-lg text-green-800 mb-2"><i class="fa-solid fa-cloud-sun-rain mr-2"></i>Informasi Cuaca (Aceh)</h3>
-                    <p class="text-sm text-gray-600 mb-3">Prakiraan cuaca terkini untuk wilayah pertanian lokal guna mengoptimalkan masa panen.</p>
-                    <div class="bg-green-50 p-3 rounded-lg text-sm text-green-900 font-medium">
-                        <p><i class="fa-solid fa-location-dot mr-1"></i> Banda Aceh: Berawan (28°C)</p>
-                        <p class="mt-1"><i class="fa-solid fa-droplet mr-1"></i> Kelembapan: 75% | Angin: 12 km/jam</p>
-                    </div>
-                </div>
-
-                <!-- Artikel & Tips Pertanian -->
-                <div class="bg-white p-5 rounded-xl shadow-md">
-                    <h3 class="font-bold text-lg text-green-800 mb-2"><i class="fa-solid fa-book-open mr-2"></i>Artikel & Tips</h3>
-                    <ul class="text-sm text-gray-600 space-y-2">
-                        <li class="hover:text-green-600 cursor-pointer">🌱 Cara Pemupukan Organik untuk Kualitas Cabai Terbaik.</li>
-                        <li class="hover:text-green-600 cursor-pointer">💧 Efisiensi Sistem Irigasi Sawah di Musim Kemarau.</li>
-                        <li class="hover:text-green-600 cursor-pointer">📈 Strategi Pemasaran Hasil Panen Lewat Digital.</li>
+                        <li class="flex justify-between items-center border-b pb-2"><span>Pak Usman (Petani - Takengon)</span> <span class="text-green-600 font-bold text-xs bg-green-50 px-2 py-1 rounded">Aktif</span></li>
+                        <li class="flex justify-between items-center border-b pb-2"><span>Ibu Aminah (Petani - Pidie)</span> <span class="text-green-600 font-bold text-xs bg-green-50 px-2 py-1 rounded">Aktif</span></li>
+                        <li class="flex justify-between items-center border-b pb-2"><span>Cut Mutia (Pembeli - Banda Aceh)</span> <span class="text-blue-600 font-bold text-xs bg-blue-50 px-2 py-1 rounded">Pembeli</span></li>
                     </ul>
                 </div>
 
-                <!-- Kontak Petani & Bantuan -->
+                <!-- Kelola Produk & Pesanan -->
                 <div class="bg-white p-5 rounded-xl shadow-md">
-                    <h3 class="font-bold text-lg text-green-800 mb-2"><i class="fa-solid fa-address-book mr-2"></i>Kontak Petani Mitra</h3>
-                    <p class="text-sm text-gray-600 mb-3">Hubungi langsung sentra kelompok tani lokal di Aceh.</p>
-                    <div class="text-sm text-gray-700 space-y-1">
-                        <p><strong>Kelompok Tani Sejahtera:</strong> 0812-6300-1122</p>
-                        <p><strong>Sentra Sayur Takengon:</strong> 0852-7788-9900</p>
+                    <h3 class="font-bold text-lg text-green-800 mb-3"><i class="fa-solid fa-boxes-packing mr-2"></i>Kelola Produk & Pesanan</h3>
+                    <p class="text-sm text-gray-600 mb-3">Admin memiliki wewenang penuh untuk memoderasi katalog serta memantau status pesanan aktif.</p>
+                    <div class="flex gap-2">
+                        <span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold" x-text="products.length + ' Produk Terdaftar'"></span>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold" x-text="orders.length + ' Pesanan Aktif'"></span>
                     </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Laporan Transaksi -->
+            <div class="bg-white rounded-xl shadow-md p-5">
+                <h3 class="font-bold text-lg text-green-800 mb-4"><i class="fa-solid fa-file-invoice-dollar mr-2"></i>Laporan Transaksi Keseluruhan</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-xs text-gray-600 uppercase">
+                                <th class="p-3">ID Pesanan</th>
+                                <th class="p-3">Nama Pembeli</th>
+                                <th class="p-3">Alamat Tujuan</th>
+                                <th class="p-3">Total Nominal</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <template x-for="order in orders" :key="order.id">
+                                <tr>
+                                    <td class="p-3 font-bold" x-text="order.id"></td>
+                                    <td class="p-3" x-text="order.name"></td>
+                                    <td class="p-3 text-xs text-gray-500" x-text="order.address"></td>
+                                    <td class="p-3 font-semibold text-green-700">Rp <span x-text="order.total.toLocaleString()"></span></td>
+                                    <td class="p-3">
+                                        <span class="px-2 py-1 rounded text-xs font-bold" :class="{
+                                            'bg-yellow-100 text-yellow-800': order.status === 'Menunggu Konfirmasi',
+                                            'bg-blue-100 text-blue-800': order.status === 'Diproses',
+                                            'bg-purple-100 text-purple-800': order.status === 'Dikirim',
+                                            'bg-green-100 text-green-800': order.status === 'Selesai'
+                                        }" x-text="order.status"></span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
     </main>
 
+    <!---------------- MODAL KERANJANG & CHECKOUT PEMBELI ---------------->
+    <div x-show="openCart" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+        <div class="bg-white w-full max-w-md h-full p-6 flex flex-col shadow-xl overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h2 class="text-xl font-bold text-green-800"><i class="fa-solid fa-cart-shopping mr-2"></i>Keranjang Belanja</h2>
+                <button @click="openCart = false" class="text-gray-500 hover:text-red-500 text-xl font-bold">&times;</button>
+            </div>
 
-    <!---------------- MODAL DETAIL PRODUK & QR CODE ---------------->
+            <!-- Item Keranjang -->
+            <div class="flex-1 overflow-y-auto space-y-4">
+                <template x-for="(item, index) in cart" :key="index">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
+                            <p class="text-sm text-gray-500">Rp <span x-text="item.price.toLocaleString()"></span> / kg</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" min="1" :max="item.stock" x-model.number="item.qty" class="w-16 border rounded text-center py-1 text-sm">
+                            <button @click="cart.splice(index, 1)" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </template>
+                <p x-show="cart.length === 0" class="text-center text-gray-500 mt-10">Keranjang masih kosong.</p>
+            </div>
+
+            <!-- Total & Form Checkout -->
+            <div class="border-t pt-4 mt-4" x-show="cart.length > 0">
+                <div class="flex justify-between font-bold text-lg mb-4">
+                    <span>Total Harga:</span>
+                    <span class="text-green-700">Rp <span x-text="cartTotal.toLocaleString()"></span></span>
+                </div>
+
+                <div class="space-y-3 mb-4">
+                    <h3 class="font-semibold text-gray-700 text-sm">Formulir Alamat Pengiriman</h3>
+                    <input type="text" x-model="checkoutForm.name" placeholder="Nama Penerima" class="w-full border rounded-lg p-2 text-sm">
+                    <input type="text" x-model="checkoutForm.phone" placeholder="Nomor Telepon / WhatsApp" class="w-full border rounded-lg p-2 text-sm">
+                    <textarea x-model="checkoutForm.address" placeholder="Alamat lengkap (Kecamatan, Kota/Kabupaten)" class="w-full border rounded-lg p-2 text-sm" rows="2"></textarea>
+                </div>
+
+                <button @click="checkoutOrder" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow">Buat Pesanan (Checkout)</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!---------------- MODAL AUTH / REGISTRASI & LOGIN ---------------->
+    <div x-show="openAuth" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm p-6 rounded-xl shadow-xl relative">
+            <button @click="openAuth = false" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl font-bold">&times;</button>
+            <h2 class="text-xl font-bold text-green-800 mb-4 text-center">Registrasi & Login Akun</h2>
+            <div class="space-y-3">
+                <input type="email" placeholder="Email / Username" class="w-full border rounded-lg p-2 text-sm">
+                <input type="password" placeholder="Password" class="w-full border rounded-lg p-2 text-sm">
+                <button @click="isLoggedIn = true; openAuth = false; alert('Berhasil masuk/registrasi!');" class="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-green-700">Masuk / Daftar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!---------------- MODAL DETAIL PRODUK ---------------->
     <div x-show="openDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl relative" @click.away="openDetailModal = false">
             <button @click="openDetailModal = false" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl font-bold">&times;</button>
-            <div v-if="selectedProduct">
+            <div x-show="selectedProduct">
                 <img :src="selectedProduct.image" class="w-full h-56 object-cover rounded-lg mb-4">
                 <h2 class="text-xl font-bold text-gray-800" x-text="selectedProduct.name"></h2>
                 <p class="text-green-700 font-bold text-lg mt-1">Rp <span x-text="selectedProduct.price.toLocaleString()"></span> / kg</p>
                 <p class="text-sm text-gray-600 mt-2"><strong>Kategori:</strong> <span x-text="selectedProduct.category"></span></p>
                 <p class="text-sm text-gray-600"><strong>Stok Tersedia:</strong> <span x-text="selectedProduct.stock"></span> kg</p>
-                <p class="text-sm text-gray-600"><strong>Petani Pengampu:</strong> <span x-text="selectedProduct.farmer"></span></p>
-                <p class="text-sm text-gray-600 mt-2"><strong>Asal Produk:</strong> <span x-text="selectedProduct.origin"></span></p>
-                
-                <!-- QR Code Simulasi -->
-                <div class="mt-4 p-3 bg-gray-50 rounded-lg border flex items-center space-x-4">
-                    <i class="fa-solid fa-qrcode text-4xl text-gray-700"></i>
-                    <div>
-                        <p class="text-xs font-bold text-gray-700">QR Code Verifikasi Keaslian Produk</p>
-                        <p class="text-xs text-gray-500">ID: TANI-ACEH-VAL-<span x-text="selectedProduct.id"></span></p>
-                    </div>
-                </div>
+                <p class="text-sm text-gray-600"><strong>Petani:</strong> <span x-text="selectedProduct.farmer"></span></p>
+                <p class="text-sm text-gray-600"><strong>Asal Produk:</strong> <span x-text="selectedProduct.origin"></span></p>
             </div>
         </div>
     </div>
@@ -335,7 +373,7 @@
     <!---------------- MODAL TAMBAH/EDIT PRODUK PETANI ---------------->
     <div x-show="openFarmerModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-xl relative">
-            <h2 class="text-xl font-bold text-green-800 mb-4">Tambah / Edit Produk Petani</h2>
+            <h2 class="text-xl font-bold text-green-800 mb-4">Tambah & Edit Produk Petani</h2>
             <div class="space-y-3">
                 <input type="text" x-model="productForm.name" placeholder="Nama Produk (contoh: Cabai Merah)" class="w-full border rounded-lg p-2 text-sm">
                 <select x-model="productForm.category" class="w-full border rounded-lg p-2 text-sm">
@@ -356,19 +394,21 @@
     </div>
 
 
-    <!-- SCRIPT ALPINE.JS LOGIC -->
+    <!-- SCRIPT ALPINE.JS -->
     <script>
         function app() {
             return {
+                currentRole: 'pembeli',
                 currentTab: 'marketplace',
                 searchQuery: '',
                 selectedCategory: '',
                 openCart: false,
+                openAuth: false,
                 openDetailModal: false,
                 openFarmerModal: false,
                 selectedProduct: null,
+                isLoggedIn: false,
                 
-                // Data Produk Awal
                 products: [
                     { id: 1, name: 'Cabai Merah Keriting', category: 'Sayur', price: 35000, stock: 50, farmer: 'Pak Usman', origin: 'Pidie, Aceh', image: 'https://images.unsplash.com/photo-1588835064336-f349d799f91a?auto=format&fit=crop&w=500&q=80' },
                     { id: 2, name: 'Bawang Merah Gayo', category: 'Rempah', price: 30000, stock: 80, farmer: 'Ibu Aminah', origin: 'Takengon, Aceh Tengah', image: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=500&q=80' },
@@ -378,11 +418,7 @@
 
                 cart: [],
                 
-                checkoutForm: {
-                    name: '',
-                    phone: '',
-                    address: ''
-                },
+                checkoutForm: { name: '', phone: '', address: '' },
 
                 orders: [
                     { id: 'ORD-001', name: 'Cut Mutia', phone: '08123456789', address: 'Jl. Teuku Umar No. 12, Banda Aceh', total: 70000, status: 'Diproses' }
@@ -390,7 +426,6 @@
 
                 productForm: { id: null, name: '', category: 'Sayur', price: 0, stock: 0, farmer: 'Pak Usman', origin: '', image: '' },
 
-                // Filter Produk Marketplace
                 get filteredProducts() {
                     return this.products.filter(p => {
                         const matchesName = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
@@ -399,44 +434,26 @@
                     });
                 },
 
-                // Total Harga Keranjang
                 get cartTotal() {
                     return this.cart.reduce((total, item) => total + (item.price * item.qty), 0);
                 },
 
-                // Tambah ke Keranjang
                 addToCart(product) {
                     const existing = this.cart.find(item => item.id === product.id);
                     if (existing) {
-                        if (existing.qty < product.stock) {
-                            existing.qty++;
-                        } else {
-                            alert('Stok produk tidak mencukupi.');
-                        }
+                        if (existing.qty < product.stock) existing.qty++;
+                        else alert('Stok tidak mencukupi.');
                     } else {
                         this.cart.push({ ...product, qty: 1 });
                     }
                     this.openCart = true;
                 },
 
-                removeFromCart(index) {
-                    this.cart.splice(index, 1);
-                },
-
-                updateCartQty(index) {
-                    if (this.cart[index].qty > this.cart[index].stock) {
-                        this.cart[index].qty = this.cart[index].stock;
-                        alert('Jumlah melebihi stok tersedia.');
-                    }
-                },
-
-                // Proses Checkout Pesanan
                 checkoutOrder() {
                     if (!this.checkoutForm.name || !this.checkoutForm.phone || !this.checkoutForm.address) {
-                        alert('Mohon lengkapi data nama, nomor telepon, dan alamat pembeli!');
+                        alert('Mohon lengkapi data pengiriman!');
                         return;
                     }
-
                     const newOrder = {
                         id: 'ORD-' + Math.floor(100 + Math.random() * 900),
                         name: this.checkoutForm.name,
@@ -445,12 +462,11 @@
                         total: this.cartTotal,
                         status: 'Menunggu Konfirmasi'
                     };
-
                     this.orders.push(newOrder);
                     this.cart = [];
                     this.openCart = false;
                     this.checkoutForm = { name: '', phone: '', address: '' };
-                    alert('Pesanan berhasil dibuat! Anda dapat melihat status pesanan pada menu Riwayat.');
+                    alert('Pesanan berhasil dibuat!');
                     this.currentTab = 'riwayat';
                 },
 
@@ -461,15 +477,13 @@
 
                 saveProduct() {
                     if (!this.productForm.name || !this.productForm.price) {
-                        alert('Nama dan harga produk wajib diisi.');
+                        alert('Nama dan harga wajib diisi.');
                         return;
                     }
                     if (this.productForm.id) {
-                        // Edit
                         const index = this.products.findIndex(p => p.id === this.productForm.id);
                         if (index !== -1) this.products[index] = { ...this.productForm };
                     } else {
-                        // Tambah Baru
                         const newId = this.products.length ? Math.max(...this.products.map(p => p.id)) + 1 : 1;
                         this.products.push({ ...this.productForm, id: newId });
                     }
@@ -483,7 +497,7 @@
                 },
 
                 deleteProduct(id) {
-                    if (confirm('Yakin ingin menghapus produk ini?')) {
+                    if (confirm('Hapus produk ini?')) {
                         this.products = this.products.filter(p => p.id !== id);
                     }
                 },
